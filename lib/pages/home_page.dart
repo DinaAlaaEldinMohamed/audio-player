@@ -100,9 +100,9 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         children: [
                           Text(
-                            assetsAudioPlayer.getCurrentAudioTitle == ''
+                            snapshot.data?.current?.audio.audio.metas.title== ''
                                 ? 'plase play song'
-                                : assetsAudioPlayer.getCurrentAudioTitle,
+                                : snapshot.data?.current?.audio.audio.metas.title??'',
                             style: TextStyle(color: purpleColor, fontSize: 18),
                           ),
                           // Playback controls
@@ -114,9 +114,12 @@ class _HomePageState extends State<HomePage> {
                                 IconButton(
                                   color: purpleColor,
                                   icon: const Icon(Icons.skip_previous),
-                                  onPressed: () {
-                                    assetsAudioPlayer.previous();
-                                  },
+                                  onPressed: snapshot.data?.current?.index == 0
+                                            ? null
+                                            : () {
+                                                assetsAudioPlayer.previous();
+                                              },
+                                  
                                 ),
                                 IconButton(
                                   icon: Icon(
@@ -140,9 +143,17 @@ class _HomePageState extends State<HomePage> {
                                   icon: const Icon(
                                     Icons.skip_next,
                                   ),
-                                  onPressed: () {
-                                    assetsAudioPlayer.next();
-                                  },
+                                  onPressed: 
+                                     snapshot.data?.current?.index ==
+                                            (assetsAudioPlayer.playlist?.audios
+                                                        .length ??
+                                                    0) -
+                                                1
+                                        ? null
+                                        : () {
+                                            assetsAudioPlayer.next();
+                                          },
+                                 // },
                                 ),
                               ],
                             ),
@@ -248,13 +259,19 @@ class _HomePageState extends State<HomePage> {
     // var audioFileDuration =
     //   assetsAudioPlayer.current.value?.audio.duration.inMilliseconds;
     // print('audioduration:$audioFileDuration');
-
+ // assetsAudioPlayer.open(audio, autoStart: false);
     return ListTile(
       title: Text(audio.metas.title ?? 'song'),
       leading: Text(audio.metas.album?.substring(0, 2).toUpperCase() ?? ''),
       subtitle: Text(audio.metas.album ?? ''),
       trailing:
-          const Text('0:00s'), //audioFileDuration?.toString() ?? '0:00s'),
+      
+          StreamBuilder(
+            stream: assetsAudioPlayer.realtimePlayingInfos,
+            builder: (context, snapshot) {
+              return  Text(convertSeconds(snapshot.data?.duration.inSeconds??0));
+            }
+          ), //audioFileDuration?.toString() ?? '0:00s'),
       onTap: () async {
         try {
           await playAudio(audio);
