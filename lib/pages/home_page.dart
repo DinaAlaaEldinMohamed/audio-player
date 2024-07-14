@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double sliderValue = 1;
+  int sliderValue = 0;
   final assetsAudioPlayer = AssetsAudioPlayer();
 
   final audios = <Audio>[
@@ -61,6 +61,9 @@ class _HomePageState extends State<HomePage> {
           autoStart: false,
           showNotification: true);
       print('playing:${assetsAudioPlayer.isPlaying.value}');
+      assetsAudioPlayer.currentPosition.listen((event) {
+      sliderValue = event.inSeconds;
+    });
       setState(() {});
     } catch (e) {
       print('Error loading audio: $e');
@@ -166,10 +169,17 @@ class _HomePageState extends State<HomePage> {
                                 thumbShape: SliderComponentShape.noThumb,
                                 inactiveTrackColor: Colors.black26),
                             child: Slider(
-                              value: sliderValue,
+                              min: 0,
+                              max: snapshot.data?.duration.inSeconds
+                                      .toDouble() ??  0.0,
+                              value: sliderValue.toDouble(),
                               onChanged: (value) {
-                                sliderValue = value;
+                                sliderValue = value.toInt();
                                 setState(() {});
+                              },
+                                onChangeEnd: (value) async {
+                                await assetsAudioPlayer
+                                    .seek(Duration(seconds: value.toInt()));
                               },
                             ),
                           ),
