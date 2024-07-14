@@ -12,6 +12,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   double sliderValue = 1;
+  final assetsAudioPlayer = AssetsAudioPlayer();
+
   final audios = <Audio>[
     Audio('assets/audio/1.mp3',
         metas: Metas(
@@ -43,9 +45,9 @@ class _HomePageState extends State<HomePage> {
   ];
 
   //create a new player
-  final assetsAudioPlayer = AssetsAudioPlayer();
   @override
   void initState() {
+    print('iniiiit');
     openPlayer();
     super.initState();
   }
@@ -67,7 +69,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    //assetsAudioPlayer.dispose();
+    assetsAudioPlayer.dispose();
     super.dispose();
   }
 
@@ -76,14 +78,14 @@ class _HomePageState extends State<HomePage> {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(title: const Text('Music Player')),
-      body: StreamBuilder<Object>(
+      body: StreamBuilder(
           stream: assetsAudioPlayer.realtimePlayingInfos,
           builder: (context, snapshot) {
-            // if (snapshot.connectionState == ConnectionState.waiting) {
-            //   return const Center(
-            //     child: CircularProgressIndicator(),
-            //   );
-            // }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
             return Padding(
               padding: const EdgeInsets.all(20),
